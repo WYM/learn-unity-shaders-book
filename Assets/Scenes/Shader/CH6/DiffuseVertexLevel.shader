@@ -1,6 +1,4 @@
-﻿// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
-
-Shader "USB/CH6/DiffuseVertexLevel"
+﻿Shader "USB/CH6/DiffuseVertexLevel"
 {
     Properties
     {
