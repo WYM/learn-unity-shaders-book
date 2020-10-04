@@ -1,4 +1,7 @@
-﻿Shader "USB/CH7/Alpha Blend"
+﻿// 使用2个Pass渲染，先写入深度，再透明度混合
+// 用于解决单Pass Alpha Blend 时 knot 等前后穿插的模型前后关系不正确的问题
+// 可以实现模型和背景的正确混合效果，但模型内部不会有半透明效果
+Shader "USB/CH7/Alpha Blend ZWrite"
 {
     Properties
     {
@@ -14,28 +17,18 @@
             "RenderType" = "Transparent"
         }
 
+        // 只处理深度缓冲
+        Pass {
+            ZWrite On // 开启深度写入
+            ColorMask 0 // 设为0则不写入任何颜色通道
+        }
+
         Pass
         {
             Tags { "LightMode" = "ForwardBase" }
 
             ZWrite Off // 关闭深度写入
-            Blend SrcAlpha OneMinusSrcAlpha // 混合模式 DstColorNew = SrcAlpha x SrcColor + (1 - SrcAlpha) x DstColorOld;
-            
-            // 混合因子
-            // Output = SrcFactor x Src + DstFactor x Dst;
-            // Blend SrcFactor DstFactor // 对RGBA通道使用同一套 factor
-            // Blend SrcFactor DstFactor, SrcFactorA DstFactorA // 使用不同的 factor 来混合透明通道
-
-            // 混合操作 BlendOp
-            // BlendOp Add      // Output = SrcFactor x Src + DstFactor x Dst;
-            // BlendOp Sub      // Output = SrcFactor x Src - DstFactor x Dst;
-            // BlendOp RevSub   // Output = DstFactor x Dst - SrcFactor x Src;
-            // BlendOp Min      // Output = (min(Src_r, Dst_r), min(Src_g, Dst_g), min(Src_b, Dst_b), min(Src_a, Dst_a));
-            // BlendOp Max      // Output = (max(Src_r, Dst_r), max(Src_g, Dst_g), max(Src_b, Dst_b), max(Src_a, Dst_a));
-            // 操作为 Min 和 Max 时，Factor 不参与运算（见计算方式）。
-
-            // 常见混合方式，见 8.6.3
-            // 例：正常、柔性相加、正片叠底、正片叠底x2、变暗、变亮、滤色、线性减淡
+            Blend SrcAlpha OneMinusSrcAlpha
 
             CGPROGRAM
             #pragma vertex vert
@@ -90,5 +83,5 @@
         }
     }
 
-    Fallback "Transparent/VertexLit"
+    Fallback "Diffuse"
 }
