@@ -1,4 +1,4 @@
-﻿Shader "Unlit/Mirror"
+﻿Shader "USB/CH10/Mirror"
 {
     Properties
     {
