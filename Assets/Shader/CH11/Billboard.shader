@@ -43,12 +43,16 @@ Shader "Unlit/Billboard"
 			    float2 uv : TEXCOORD0;
             };
 
+            // 因为此处顶点动画改变了顶点位置，如果需要投射阴影，也要自定义 ShadowCaster Pass，否则 Unity 会使用原始的顶点来计算阴影。
+            // 自定义阴影可见原书 11.3.3 节。
             v2f vert (a2v v)
             {
                 v2f o;
 
                 // 获取模型空间下的视角位置 viewer
-                float center = float3(0, 0, 0); // 以空间原点为锚点
+                // 以模型空间原点为锚点
+                // 商业游戏中，也常使用顶点色来存储顶点到锚点距离，避免显式使用模型空间中心导致合批后中心不正确。
+                float center = float3(0, 0, 0);
                 float3 viewer = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos, 1));
 
                 // 当 _VetrticalBillboarding 为 1 时，法线方向固定为视角方向。
