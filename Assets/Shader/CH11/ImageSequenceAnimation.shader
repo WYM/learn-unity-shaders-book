@@ -55,19 +55,16 @@ Shader "USB/CH10/ImageSequenceAnimation"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float time = floor(_Time.y * _Speed);
-                float row = floor(time / _HorizontalAmount);
-                float column = time - row * _HorizontalAmount;
+                float columns = max(1.0, floor(_HorizontalAmount));
+                float rows = max(1.0, floor(_VerticalAmount));
+                float frameCount = columns * rows;
+                float frame = floor(_Time.y * _Speed);
+                float frameInLoop = frame - floor(frame / frameCount) * frameCount;
+                float row = floor(frameInLoop / columns);
+                float column = frameInLoop - row * columns;
 
-                // 均匀分割并获取当前帧坐标
-                // half2 uv = float2(i.uv.x / _HorizontalAmount, i.uv.y / _VerticalAmount);
-                // uv.x += column / _HorizontalAmount;
-                // uv.y -= row / _VerticalAmount;
-
-                // 简化后得到：
-                half2 uv = i.uv + half2(column, -row);
-                uv.x /= _HorizontalAmount;
-                uv.y /= _VerticalAmount;
+                // 图集从左上角开始排列，纹理 UV 的原点在左下角。
+                float2 uv = (i.uv + float2(column, rows - 1.0 - row)) / float2(columns, rows);
 
                 fixed4 c = tex2D(_MainTex, uv);
                 c.rgb *= _Color;
